@@ -27,7 +27,7 @@ class Product(models.Model):
 
 
 class OrderItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="order_items")
+    order = models.ForeignKey("Order", on_delete=models.CASCADE,)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="ordered")
     quantity = models.PositiveIntegerField(default=1)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -39,3 +39,10 @@ class OrderItem(models.Model):
             raise ValueError("Quantity cannot be 0")
 
         return super().save(*args, **kwargs)
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="order_items")
+    products = models.ManyToManyField(Product, through=OrderItem)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
