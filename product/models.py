@@ -27,7 +27,7 @@ class Product(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey("Order", on_delete=models.CASCADE,)
+    order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="order_items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="ordered")
     quantity = models.PositiveIntegerField(default=1)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -44,5 +44,13 @@ class OrderItem(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="order_items")
     products = models.ManyToManyField(Product, through=OrderItem)
+    transaction_numb = models.CharField(max_length=500)
     timestamp = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        transaction_numb = self.transaction_numb
+        if (transaction_numb is None) or (transaction_numb == ""):
+            self.transaction_numb = str(secrets.token_hex(50))
+
+        return super().save(*args, **kwargs)
