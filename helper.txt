@@ -1,0 +1,39 @@
+>>> from product.models  import Product, Order, OrderItem
+>>> from django.contrib.auth import get_user_model
+>>> User = get_user_model()
+>>> user = User.objects.first()
+>>> user.orders
+<django.db.models.fields.related_descriptors.create_reverse_many_to_one_manager.<locals>.RelatedManager object at 0x000001B674DCEE48>
+>>> user.orders.all()
+<QuerySet [<Order: Order object (1)>]>
+>>> user.orders.filter(submitted=False)
+<QuerySet [<Order: Order object (1)>]>
+>>> qs = user.orders.filter(submitted=False)
+>>> if qs.exists():
+...     order_obj = qs.get()
+...
+>>> order_obj
+<Order: Order object (1)>
+>>> order_obj.products
+<django.db.models.fields.related_descriptors.create_forward_many_to_many_manager.<locals>.ManyRelatedManager object at 0x000001B676B41FC8>
+>>> order_obj.products.all()
+<QuerySet []>
+>>> product = Product.objects.first()
+>>> product
+<Product: Shirt>
+>>> order_obj.products.add(product)
+>>> order_obj.save()
+>>> order_obj.products.add(product)
+>>> order_obj.save()
+>>> product
+<Product: Shirt>
+>>> order_obj.products.filter(slug=product.slug)
+<QuerySet [<Product: Shirt>]>
+>>> qs = order_obj.products.filter(slug=product.slug)
+>>> if qs.exists():
+...     order_item = OrderItem.objects.get(order=order_obj, product=product)
+...     order_item
+...     order_item.quantity += 1
+...     order_item.save()
+...
+<OrderItem: OrderItem object (1)>

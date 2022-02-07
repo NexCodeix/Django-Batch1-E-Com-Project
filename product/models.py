@@ -42,9 +42,10 @@ class OrderItem(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="order_items")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     products = models.ManyToManyField(Product, through=OrderItem)
     transaction_numb = models.CharField(max_length=500)
+    submitted = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
