@@ -11,7 +11,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.FloatField()
     slug = models.SlugField(unique=True)
-
+    image = models.ImageField(upload_to="products", null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
@@ -24,6 +24,17 @@ class Product(models.Model):
             self.slug = slugify(self.name) + str(secrets.token_hex(6))
 
         return super().save(*args, **kwargs)
+
+
+class ProductImages(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="product_images", null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.product.name
+
 
 
 class OrderItem(models.Model):

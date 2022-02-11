@@ -1,8 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
-
+from .models import Product, OrderItem, Order
 
 
 User = get_user_model()
@@ -12,10 +12,12 @@ class HomePage(ListView):
     """
     HOME PAGE
     """
+    context_object_name = "products"
     template_name = "product/index.html"
 
     def get_queryset(self):
-        pass
+        qs = Product.objects.all()
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -35,9 +37,11 @@ class ShopPage(ListView):
     Shop PAGE
     """
     template_name = "product/shop.html"
-
+    context_object_name = "products"
+    
     def get_queryset(self):
-        pass
+        qs = Product.objects.all()
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -55,13 +59,18 @@ class ProductDetailPage(DetailView):
     PRODUCT PAGE
     """
     template_name = "product/product_detail.html"
-    lookup_url_kwarg = "product_id"
+    lookup_url_kwarg = "product_slug"
 
     # def get_queryset(self):
     #     pass
 
     def get_object(self):
-        pass
+        return self.get_product()
+
+    def get_product(self):
+        slug = self.kwargs.get(self.lookup_url_kwarg)
+        product = get_object_or_404(Product, slug=slug)
+        return product
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
