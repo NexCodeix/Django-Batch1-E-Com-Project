@@ -38,7 +38,7 @@ class ShopPage(ListView):
     """
     template_name = "product/shop.html"
     context_object_name = "products"
-    
+
     def get_queryset(self):
         qs = Product.objects.all()
         return qs
@@ -58,6 +58,7 @@ class ProductDetailPage(DetailView):
     """
     PRODUCT PAGE
     """
+    context_object_name = "product"
     template_name = "product/product_detail.html"
     lookup_url_kwarg = "product_slug"
 
@@ -70,11 +71,26 @@ class ProductDetailPage(DetailView):
     def get_product(self):
         slug = self.kwargs.get(self.lookup_url_kwarg)
         product = get_object_or_404(Product, slug=slug)
+        self.object = product
         return product
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        product = self.object
+        tags = product.tags.all()
 
+        qs = Product.objects.none()  # []
+        for tag in tags:
+            products = tag.product_set.all()
+            qs |= products.distinct()  # append\
+            qs = qs.distinct()
+
+        if not qs.exists():
+            qs = Product.objects.all()[:5]
+
+        print("Tags -> ", tags)
+        print("Queryset ", qs)
+        context["similar_products"] = qs.distinct()
         return context
 
 

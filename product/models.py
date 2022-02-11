@@ -11,6 +11,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.FloatField()
     slug = models.SlugField(unique=True)
+    tags = models.ManyToManyField("Tag")
     image = models.ImageField(upload_to="products", null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
@@ -35,6 +36,14 @@ class ProductImages(models.Model):
     def __str__(self):
         return self.product.name
 
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 
 class OrderItem(models.Model):
