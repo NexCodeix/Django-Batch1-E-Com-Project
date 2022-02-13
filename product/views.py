@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
@@ -68,9 +69,16 @@ class ProductDetailPage(DetailView):
     def get_object(self):
         return self.get_product()
 
+    def get_filtered_qs(self, slug):
+        qs = Product.objects.filter(slug=slug)
+        if not qs.exists():
+            raise Http404
+        self.queryset = qs
+        return qs
+
     def get_product(self):
         slug = self.kwargs.get(self.lookup_url_kwarg)
-        product = get_object_or_404(Product, slug=slug)
+        product = self.get_filtered_qs(slug).get()
         self.object = product
         return product
 
@@ -79,18 +87,27 @@ class ProductDetailPage(DetailView):
         product = self.object
         tags = product.tags.all()
 
-        qs = Product.objects.none()  # []
+        product_qs = Product.objects.none()  # []
         for tag in tags:
             products = tag.product_set.all()
-            qs |= products.distinct()  # append\
-            qs = qs.distinct()
+            print("Tag Products ", products)
+            product_qs |= products  # append\
 
-        if not qs.exists():
-            qs = Product.objects.all()[:5]
+        if not product_qs.exists():
+            main_qs = Product.objects.all()[:4]
+        else:
+            if product_qs.count() < 4:
+                qs1 = Product.objects.all()[:4 - product_qs.count()]
+                print("SELF", self.queryset)
+                main_qs = self.queryset | qs1
+            else:
+                main_qs = product_qs
 
-        print("Tags -> ", tags)
-        print("Queryset ", qs)
-        context["similar_products"] = qs.distinct()
+            main_qs = main_qs.distinct()
+        print(main_qs)
+        # print("Tags -> ", tags)
+        # print("Queryset ", product_qs)
+        context["similar_products"] = main_qs
         return context
 
 
