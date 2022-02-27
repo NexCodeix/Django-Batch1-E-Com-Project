@@ -13,32 +13,32 @@
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" checked id="price-all">
                             <label class="custom-control-label" for="price-all">All Price</label>
-                            <span class="badge border font-weight-normal">1000</span>
+                            <span class="badge border font-weight-normal">0</span>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" id="price-1">
-                            <label class="custom-control-label" for="price-1">$0 - $100</label>
-                            <span class="badge border font-weight-normal">150</span>
+                            <label class="custom-control-label" for="price-1">$0 - $5</label>
+                            <span class="badge border font-weight-normal">0</span>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" id="price-2">
-                            <label class="custom-control-label" for="price-2">$100 - $200</label>
-                            <span class="badge border font-weight-normal">295</span>
+                            <label class="custom-control-label" for="price-2">$5 - $10</label>
+                            <span class="badge border font-weight-normal">0</span>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" id="price-3">
-                            <label class="custom-control-label" for="price-3">$200 - $300</label>
-                            <span class="badge border font-weight-normal">246</span>
+                            <label class="custom-control-label" for="price-3">$10 - $15</label>
+                            <span class="badge border font-weight-normal">0</span>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" id="price-4">
-                            <label class="custom-control-label" for="price-4">$300 - $400</label>
-                            <span class="badge border font-weight-normal">145</span>
+                            <label class="custom-control-label" for="price-4">$15 - $20</label>
+                            <span class="badge border font-weight-normal">0</span>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
                             <input type="checkbox" class="custom-control-input" id="price-5">
-                            <label class="custom-control-label" for="price-5">$400 - $500</label>
-                            <span class="badge border font-weight-normal">168</span>
+                            <label class="custom-control-label" for="price-5">$20 - $25</label>
+                            <span class="badge border font-weight-normal">0</span>
                         </div>
                     </form>
                 </div>
@@ -176,28 +176,50 @@
                     </div>
 
                     {% endfor %}
-
-                    <div class="col-12 pb-1">
-                        <nav aria-label="Page navigation">
-                          <ul class="pagination justify-content-center mb-3">
-                            <li class="page-item disabled">
-                              <a class="page-link" href="#" aria-label="Previous">
+                    
+                    {% if is_paginated %}
+                        <div class="col-12 pb-1">
+                            <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mb-3">
+                                
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                    <a class="page-link" 
+                                    href="?page={{ page_obj.previous_page_number }}"
+                                {% else %}
+                                    <li class="page-item disabled">
+                                    <a class="page-link" 
+                                href="#"
+                                {% endif %}
+        
+                                aria-label="Previous">
+                                
                                 <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
-                              </a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                              <a class="page-link" href="#" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span class="sr-only">Next</span>
-                              </a>
-                            </li>
-                          </ul>
-                        </nav>
-                    </div>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">{{ page_obj.number }}</a>
+                                </li>
+
+                                
+                                                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                {% else %}
+                                    <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="Next">    
+                                {% endif %}
+
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                                </li>
+                            </ul>
+                            </nav>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <!-- Shop Product End -->

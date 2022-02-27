@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
 from .models import Product, OrderItem, Order
-
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -39,10 +39,41 @@ class ShopPage(ListView):
     """
     template_name = "product/shop.html"
     context_object_name = "products"
+    paginate_by = 2
 
-    def get_queryset(self):
+    def filter_by_category(self, qs):
+        pass
+
+    def get_products(self):
+        starting_price = self.request.GET.get("strtp")
+        end_price = self.request.GET.get("endp")
+
+        # if (starting_price) and (not end_price):
+        #     pass
+
+        # if (end_price) and (not starting_price):
+        #     pass
+
+        if starting_price and end_price:
+            return self.filter_qs_by_price(starting_price, end_price)
+
         qs = Product.objects.all()
         return qs
+
+    def filter_qs_by_price(self, starting_price, end_price):
+        try:
+            starting_price = float(starting_price)
+            end_price = float(end_price)
+        except ValueError:
+            return Product.objects.all()
+
+        qs = Product.objects.filter(Q(price__gte=starting_price) & Q(price__lte=end_price))
+
+        return qs
+
+    def get_queryset(self):
+        products = self.get_products()
+        return products
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

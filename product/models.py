@@ -7,11 +7,19 @@ User = get_user_model()
 
 
 class Product(models.Model):
+    PRODUCT_CATEGORY = (
+        ("dress", "dress"),
+        ("bag", "bag"),
+        ("shirt", "shirt"),
+        ("cloth", "cloth"),
+        ("jacket", "jacket"),
+    )
     name = models.CharField(max_length=500)
     description = models.TextField()
     price = models.FloatField()
     slug = models.SlugField(unique=True)
     tags = models.ManyToManyField("Tag")
+    category = models.CharField(max_length=100, choices=PRODUCT_CATEGORY)
     image = models.ImageField(upload_to="products", null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
