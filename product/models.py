@@ -1,9 +1,23 @@
+import uuid
 import secrets
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
+from django.core.exceptions import ValidationError
+
 
 User = get_user_model()
+
+def uuid_without_dash():
+    return uuid.uuid4().hex
+
+
+def validate_rating(value):
+    value = int(value)
+    if value > 5:
+        raise ValidationError("Rating cannot be more than 5")
+
+    return value
 
 
 class Product(models.Model):
@@ -52,6 +66,22 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid_without_dash)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_given")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews")
+    text = models.TextField()
+    rating = models.PositiveSmallIntegerField(validators=[validate_rating])
+    timestamp = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ["user", "product"]
+
+    def __str__(self):
+        return f"{self.user} reviewed {self.product}"
 
 
 class OrderItem(models.Model):

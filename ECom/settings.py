@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'product.apps.ProductConfig',
 
     'rest_framework',
+    'rest_framework.authtoken',
 
     'crispy_forms',
 ]
