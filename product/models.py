@@ -33,6 +33,7 @@ class Product(models.Model):
     price = models.FloatField()
     slug = models.SlugField(unique=True)
     tags = models.ManyToManyField("Tag")
+    files = models.FileField(upload_to="documents", null=True, blank=True)
     category = models.CharField(max_length=100, choices=PRODUCT_CATEGORY)
     image = models.ImageField(upload_to="products", null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)

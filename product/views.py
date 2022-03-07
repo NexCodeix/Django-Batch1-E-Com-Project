@@ -1,10 +1,12 @@
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
 from .models import Product, OrderItem, Order
 from django.db.models import Q
+
+from django.core.exceptions import PermissionDenied
 
 User = get_user_model()
 
@@ -150,3 +152,36 @@ def product_detail(request):
 def checkout(request):
 
     return render(request, "product/checkout.html")
+
+
+def order_item(request, product_slug):
+    if not request.user.is_authenticated:
+        raise PermissionDenied("")
+    if request.method != "POST":
+        raise Http404("User POST METHOD")
+    product_obj = get_object_or_404(Product, slug=product_slug)
+    user = request.user
+    order_qs = user.orders.filter(submitted=False)
+    if order_qs.exists():
+        print("Got an Existing Order")
+        order_obj = order_qs.get()
+    else:
+        print("Created a New Order")
+        order_obj = Order.objects.create(user=user)
+
+    product_qs = order_obj.products.filter(id=product_obj.id)
+    if product_qs.exists():
+        print("Found Product in this Order")
+        order_item_obj = order_obj.order_items.get(product=product_obj)
+        order_item_obj.quantity += 1
+        order_item_obj.save()
+
+    else:
+        print("Adding Products to the order")
+        order_obj.products.add(product_obj)
+        order_obj.save()
+
+    print("Product Added \n \n")
+
+
+    return JsonResponse("Product Added", safe=False)

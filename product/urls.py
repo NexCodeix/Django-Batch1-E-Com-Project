@@ -6,4 +6,6 @@ urlpatterns = [
     path("shop/", views.ShopPage.as_view(), name="shop"),
     path("products/detail/<product_slug>/", views.ProductDetailPage.as_view(), name="product_detail"),
     path("checkout/", views.checkout),
+
+    path("order/item/<product_slug>/", views.order_item, name="Order-Item")
 ]
