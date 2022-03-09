@@ -1,4 +1,5 @@
 {% load static %}
+{% load product_tags %}
 <!-- Topbar Start -->
     <div class="container-fluid">
         <div class="row bg-secondary py-2 px-xl-5">
@@ -56,7 +57,7 @@
                 </a>
                 <a href="" class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">0</span>
+                    <span class="badge">{{ request.user | order_items_of_user }}</span>
                 </a>
             </div>
         </div>
