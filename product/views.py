@@ -114,6 +114,19 @@ class ProductDetailPage(DetailView):
         self.object = product
         return product
 
+    def product_in_user_order_item(self, product):
+        user = self.request.user
+        qs = user.orders.filter(submitted=False)
+        if not qs.exists():
+            return 0
+
+        order_obj = qs.get()
+        qs = OrderItem.objects.filter(order=order_obj, product=product)
+        if not qs.exists():
+            return 0
+
+        return qs.get().quantity
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         product = self.object
@@ -140,6 +153,7 @@ class ProductDetailPage(DetailView):
         # print("Tags -> ", tags)
         # print("Queryset ", product_qs)
         context["similar_products"] = main_qs
+        context["product_counter"] = self.product_in_user_order_item(product)
         return context
 
 

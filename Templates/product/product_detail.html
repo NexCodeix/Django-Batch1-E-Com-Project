@@ -115,7 +115,7 @@
                             <i class="fa fa-minus"></i>
                             </button>
                         </div>
-                        <input type="text" class="form-control bg-secondary text-center" value="1">
+                        <input type="text" class="form-control bg-secondary text-center" value="{{ product_counter }}">
                         <div class="input-group-btn">
                             <button class="btn btn-primary btn-plus">
                                 <i class="fa fa-plus"></i>
@@ -156,6 +156,10 @@
                     <div class="tab-pane fade show active" id="tab-pane-1">
                         <h4 class="mb-3">Product Description</h4>
                         <p>{{ product.description }}</p>
+                        {% if product.files %}
+                        <!-- forloop -> if many fils -->
+                            <a class="btn btn-secondary" href="{{ product.files.url }}">Click</a>
+                        {% endif %}
                     </div>
                     <div class="tab-pane fade" id="tab-pane-2">
                         <h4 class="mb-3">Additional Information</h4>
