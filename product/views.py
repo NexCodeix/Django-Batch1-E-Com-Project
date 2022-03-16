@@ -8,6 +8,11 @@ from django.db.models import Q
 
 from django.core.exceptions import PermissionDenied
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from .forms import BillingAddressForm
+
 User = get_user_model()
 
 
@@ -87,7 +92,7 @@ def shop(request):
     return render(request, "product/shop.html")
 
 
-class ProductDetailPage(DetailView):
+class ProductDetailPage(DetailView, LoginRequiredMixin):
     """
     PRODUCT PAGE
     """
@@ -116,6 +121,8 @@ class ProductDetailPage(DetailView):
 
     def product_in_user_order_item(self, product):
         user = self.request.user
+        if not user.is_authenticated:
+            return 0
         qs = user.orders.filter(submitted=False)
         if not qs.exists():
             return 0
@@ -163,10 +170,44 @@ def product_detail(request):
 
 
 def checkout(request):
+    form = BillingAddressForm()
+    context = {
+        "form": form,
+    }
 
-    return render(request, "product/checkout.html")
+    return render(request, "product/checkout.html", context)
 
 
+class CheckoutView(CreateView):
+    form_class = BillingAddressForm
+    template_name = "product/checkout.html"
+    success_url = "/"
+
+    def get_object(self):
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = self.get_order()
+        context["order"] = order
+        return context  
+
+    def get_order(self):
+        user = self.request.user
+        order_qs = user.orders.filter(submitted=False)
+        if order_qs.exists():
+            obj = order_qs.get()
+            self.order = obj
+            return obj
+
+        raise Http404
+
+    def form_valid(self, form):
+        form.instance.order = self.get_order()
+        return super().form_valid(form)
+
+
+@login_required
 def order_item(request, product_slug):
     if not request.user.is_authenticated:
         raise PermissionDenied("")

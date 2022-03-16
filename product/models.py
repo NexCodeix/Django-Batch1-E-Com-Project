@@ -114,3 +114,18 @@ class Order(models.Model):
             self.transaction_numb = str(secrets.token_hex(50))
 
         return super().save(*args, **kwargs)
+
+
+class BillingAddress(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="billing")
+    id = models.UUIDField(primary_key=True, unique=True, default=uuid_without_dash, editable=False)
+    first_name = models.CharField(max_length=300)
+    last_name = models.CharField(max_length=300)
+    email = models.EmailField()
+    mobile = models.CharField(max_length=300)
+    address = models.TextField()
+    city = models.CharField(max_length=300)
+    zip = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} order"
