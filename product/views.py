@@ -1,12 +1,13 @@
 from django.http import Http404, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
-from .models import Product, OrderItem, Order
+from .models import Product, OrderItem, Order,Subscribe
 from django.db.models import Q
 
 from django.core.exceptions import PermissionDenied
+from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -239,3 +240,15 @@ def order_item(request, product_slug):
 
 
     return JsonResponse("Product Added", safe=False)
+
+
+def subscribe(request):
+    if request.method == "POST":
+        name = request.POST['name']
+        email = request.POST['email']      
+        
+        values = Subscribe(name=name, email=email)        
+        values.save()
+        messages.success(request,"submitted")
+        return redirect("/") 
+        
