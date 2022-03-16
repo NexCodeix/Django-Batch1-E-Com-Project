@@ -1,5 +1,5 @@
 from django.http import Http404, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
@@ -7,6 +7,7 @@ from .models import Product, OrderItem, Order,Subscribe
 from django.db.models import Q
 
 from django.core.exceptions import PermissionDenied
+from django.contrib import messages
 
 User = get_user_model()
 
@@ -207,5 +208,6 @@ def subscribe(request):
         
         values = Subscribe(name=name, email=email)        
         values.save()
-        return render (request, 'sendmsg.html')
+        messages.success(request,"submitted")
+        return redirect("/") 
         
