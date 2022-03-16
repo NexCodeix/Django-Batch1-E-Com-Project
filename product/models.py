@@ -114,3 +114,9 @@ class Order(models.Model):
             self.transaction_numb = str(secrets.token_hex(50))
 
         return super().save(*args, **kwargs)
+    
+    
+class Subscribe(models.Model):
+    name = models.CharField(max_length=100)
+    email =models.CharField( max_length=50)
+    date_created=models.DateTimeField(auto_now_add=True)

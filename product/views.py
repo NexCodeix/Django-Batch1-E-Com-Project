@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
-from .models import Product, OrderItem, Order
+from .models import Product, OrderItem, Order,Subscribe
 from django.db.models import Q
 
 from django.core.exceptions import PermissionDenied
@@ -198,3 +198,14 @@ def order_item(request, product_slug):
 
 
     return JsonResponse("Product Added", safe=False)
+
+
+def subscribe(request):
+    if request.method == "POST":
+        name = request.POST['name']
+        email = request.POST['email']      
+        
+        values = Subscribe(name=name, email=email)        
+        values.save()
+        return render (request, 'sendmsg.html')
+        
