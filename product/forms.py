@@ -1,5 +1,5 @@
 from django import forms
-from .models import BillingAddress
+from .models import BillingAddress, Product
 
 
 def text_inp_widget(placeholder):
@@ -26,3 +26,26 @@ class BillingAddressForm(forms.ModelForm):
         print(num)
 
         return self.cleaned_data.get("mobile")
+
+
+
+class ProductAdminAddForm(forms.ModelForm):
+
+    class Meta:
+        model = Product
+        fields = ["name", "description", "price", "category"]
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name")
+        qs = Product.objects.filter(name=name)
+        if qs.exists():
+            raise forms.ValidationError("Unique")
+        return name
+
+
+class ProductAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Product
+        fields = "__all__"
+        

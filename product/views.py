@@ -1,3 +1,4 @@
+import json
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404,redirect
 from django.contrib.auth import get_user_model
@@ -214,6 +215,10 @@ def order_item(request, product_slug):
         raise PermissionDenied("")
     if request.method != "POST":
         raise Http404("User POST METHOD")
+    
+    
+    data = json.loads(request.body)
+    quantity = int(data.get("quantity", 1))
     product_obj = get_object_or_404(Product, slug=product_slug)
     user = request.user
     order_qs = user.orders.filter(submitted=False)
@@ -228,7 +233,7 @@ def order_item(request, product_slug):
     if product_qs.exists():
         print("Found Product in this Order")
         order_item_obj = order_obj.order_items.get(product=product_obj)
-        order_item_obj.quantity += 1
+        order_item_obj.quantity = quantity
         order_item_obj.save()
 
     else:

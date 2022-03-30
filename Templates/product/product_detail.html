@@ -115,7 +115,8 @@
                             <i class="fa fa-minus"></i>
                             </button>
                         </div>
-                        <input type="text" class="form-control bg-secondary text-center" value="{{ product_counter }}">
+                        <input type="text" class="form-control bg-secondary text-center" id="cart-input"
+                            value="{{ product_counter }}">
                         <div class="input-group-btn">
                             <button class="btn btn-primary btn-plus">
                                 <i class="fa fa-plus"></i>
@@ -269,9 +270,9 @@
                     {% for product in similar_products %}
                         <div class="card product-item border-0">
                             {% if product.image %}
-                            <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                                <img class="img-fluid w-100" src="{{ product.image.url }}" alt="">
-                            </div>
+                                <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                                    <img class="img-fluid w-100" src="{{ product.image.url }}" alt="">
+                                </div>
                             {% endif %}
                             <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
                                 <h6 class="text-truncate mb-3">{{  product.name }}</h6>
@@ -321,6 +322,8 @@
         var slug = addItemBtn.getAttribute("data-product");
 
         addItemBtn.addEventListener("click", function(e){
+            var inp = document.getElementById("cart-input");
+            var value = inp.value;
             var url = `/order/item/${slug}/`;
             console.log(url);
 
@@ -328,7 +331,10 @@
                 "method": "POST",
                 "headers": {
                     "X-CSRFToken": csrftoken,
-                }
+                },
+                "body": JSON.stringify({
+                    "quantity": value,
+                })
             });
 
         });
