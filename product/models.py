@@ -92,6 +92,13 @@ class OrderItem(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
+    def all_info_to_text(self):
+        return f"${self.product.price} * {self.quantity} = ${self.get_total}"
+
+    @property
+    def get_total(self):
+        return self.product.price * self.quantity
+
     def save(self, *args, **kwargs):
         quantity = self.quantity
         if quantity and (quantity < 1):
@@ -115,10 +122,21 @@ class Order(models.Model):
 
         return super().save(*args, **kwargs)
 
+    def get_all_items(self):
+        qs = self.order_items.all()
+        return qs
+
+    def total_bill(self):
+        items = self.get_all_items()
+        total = 0
+        for i in items:
+            total += int(i.get_total)
+
+        return total
 
 class BillingAddress(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="billing")
     id = models.UUIDField(primary_key=True, unique=True, default=uuid_without_dash, editable=False)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="billing")
     first_name = models.CharField(max_length=300)
     last_name = models.CharField(max_length=300)
     email = models.EmailField()

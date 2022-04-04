@@ -2,32 +2,29 @@ from django import forms
 from .models import BillingAddress, Product
 
 
-def text_inp_widget(placeholder):
+def text_inp_widget(class_name="form-control", type_div="text", placeholder="name"):
     return forms.TextInput(attrs={
-    'class': 'form-control',
+    'class': class_name,
+    'type': type_div,
     "placeholder": str(placeholder)})
 
 
 class BillingAddressForm(forms.ModelForm):
+    order = forms.CharField(required=False)
     first_name = forms.CharField(
-        widget=text_inp_widget("john")
+        widget=text_inp_widget(placeholder="john")
     )
-    last_name = forms.CharField(widget=text_inp_widget("doe"))
+    last_name = forms.CharField(widget=text_inp_widget(placeholder="doe"))
+    email = forms.CharField(widget=text_inp_widget(placeholder="yourmail@gmail.com"))
+    mobile = forms.CharField(widget=text_inp_widget(placeholder="+880 **********"))
+    address = forms.CharField(widget=text_inp_widget(placeholder="Gulshan, Dhaka"))
+    city = forms.CharField(widget=text_inp_widget(placeholder="Dhaka"))
+    zip = forms.CharField(widget=text_inp_widget(placeholder="Dhaka"))
+
     class Meta:
         model = BillingAddress
+        # exclude = ["order", ]
         fields = "__all__"
-
-    def clean_mobile(self):
-        number = self.cleaned_data.get("mobile")
-        num = number[:4]
-        # if (num != "+880") or (num != "018") or (num != "017") or (num != "016"):
-        #     raise forms.ValidationError("pls type a bd number")
-
-        print(num)
-
-        return self.cleaned_data.get("mobile")
-
-
 
 class ProductAdminAddForm(forms.ModelForm):
 

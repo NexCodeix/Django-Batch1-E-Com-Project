@@ -20,4 +20,9 @@ def order_items_of_user(user_obj):
     return total
 
 
+def add(x):
+    return int(x) + 10
+
+
 register.filter(name="order_items_of_user", filter_func=order_items_of_user)
+register.filter(name="add", filter_func=add)

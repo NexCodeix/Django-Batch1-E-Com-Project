@@ -6,7 +6,7 @@ from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
 from .models import Product, OrderItem, Order,Subscribe
 from django.db.models import Q
-
+from django.http import HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 
@@ -180,7 +180,7 @@ def checkout(request):
     return render(request, "product/checkout.html", context)
 
 
-class CheckoutView(CreateView):
+class CheckoutView(LoginRequiredMixin, CreateView):
     form_class = BillingAddressForm
     template_name = "product/checkout.html"
     success_url = "/"
@@ -191,7 +191,11 @@ class CheckoutView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         order = self.get_order()
+        print("Order -> ", order, "\n")
         context["order"] = order
+        context["ordered_products"] = order.get_all_items()
+        # print(context["form"])
+        # print(context)
         return context  
 
     def get_order(self):
@@ -204,9 +208,16 @@ class CheckoutView(CreateView):
 
         raise Http404
 
+    def form_invalid(self, form):
+        print("Invalid")
+        print(form.errors)
+        return super().form_invalid(form)
+
     def form_valid(self, form):
-        form.instance.order = self.get_order()
-        return super().form_valid(form)
+        obj = form.save(commit=False)
+        obj.order = self.get_order()
+        obj.save()
+        return HttpResponseRedirect(self.success_url)
 
 
 @login_required
