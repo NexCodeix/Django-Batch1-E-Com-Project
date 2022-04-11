@@ -211,3 +211,4 @@ def subscribe(request):
         messages.success(request,"submitted")
         return redirect("/") 
         
+   
