@@ -1,3 +1,4 @@
+import json
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404,redirect
 from django.contrib.auth import get_user_model
@@ -5,9 +6,14 @@ from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth import login, authenticate, logout
 from .models import Product, OrderItem, Order,Subscribe
 from django.db.models import Q
-
+from django.http import HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from .forms import BillingAddressForm
 
 User = get_user_model()
 
@@ -88,7 +94,7 @@ def shop(request):
     return render(request, "product/shop.html")
 
 
-class ProductDetailPage(DetailView):
+class ProductDetailPage(DetailView, LoginRequiredMixin):
     """
     PRODUCT PAGE
     """
@@ -117,6 +123,8 @@ class ProductDetailPage(DetailView):
 
     def product_in_user_order_item(self, product):
         user = self.request.user
+        if not user.is_authenticated:
+            return 0
         qs = user.orders.filter(submitted=False)
         if not qs.exists():
             return 0
@@ -164,15 +172,64 @@ def product_detail(request):
 
 
 def checkout(request):
+    form = BillingAddressForm()
+    context = {
+        "form": form,
+    }
 
-    return render(request, "product/checkout.html")
+    return render(request, "product/checkout.html", context)
 
 
+class CheckoutView(LoginRequiredMixin, CreateView):
+    form_class = BillingAddressForm
+    template_name = "product/checkout.html"
+    success_url = "/"
+
+    def get_object(self):
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = self.get_order()
+        print("Order -> ", order, "\n")
+        context["order"] = order
+        context["ordered_products"] = order.get_all_items()
+        # print(context["form"])
+        # print(context)
+        return context  
+
+    def get_order(self):
+        user = self.request.user
+        order_qs = user.orders.filter(submitted=False)
+        if order_qs.exists():
+            obj = order_qs.get()
+            self.order = obj
+            return obj
+
+        raise Http404
+
+    def form_invalid(self, form):
+        print("Invalid")
+        print(form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.order = self.get_order()
+        obj.save()
+        return HttpResponseRedirect(self.success_url)
+
+
+@login_required
 def order_item(request, product_slug):
     if not request.user.is_authenticated:
         raise PermissionDenied("")
     if request.method != "POST":
         raise Http404("User POST METHOD")
+    
+    
+    data = json.loads(request.body)
+    quantity = int(data.get("quantity", 1))
     product_obj = get_object_or_404(Product, slug=product_slug)
     user = request.user
     order_qs = user.orders.filter(submitted=False)
@@ -187,7 +244,7 @@ def order_item(request, product_slug):
     if product_qs.exists():
         print("Found Product in this Order")
         order_item_obj = order_obj.order_items.get(product=product_obj)
-        order_item_obj.quantity += 1
+        order_item_obj.quantity = quantity
         order_item_obj.save()
 
     else:
